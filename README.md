@@ -80,11 +80,11 @@ The root [`render.yaml`](./render.yaml) configures a free Render web service usi
    ```
 
    This makes the test data accessible to anyone with the public key. Do not use this setup with real student records. For real data, keep RLS enabled and set a server-only service-role/secret key in Render instead; never put that key in the browser or ESP32 firmware. Render generates separate `ADMIN_API_KEY` and `DEVICE_API_KEY` values.
-5. After deployment, open the service URL and sign in using `ADMIN_API_KEY` from the Render environment settings. Configure the ESP32 with that service URL as `API_BASE_URL`, `DEVICE_API_KEY` from Render, and the trusted certificate in `ROOT_CA_CERT` for HTTPS.
+5. After deployment, open the service URL and sign in using `ADMIN_API_KEY` from the Render environment settings. Before flashing the ESP32, set the Wi-Fi credentials, `DEVICE_API_KEY` from Render, and the trusted certificate in `ROOT_CA_CERT` at the top of the sketch. The local `.env` device key does not match the Render-generated key.
 
 ## 3. Wire and flash the ESP32
 
-Follow [`HARDWARE_CONNECTIONS.md`](./HARDWARE_CONNECTIONS.md). Open `firmware/antende_esp32/antende_esp32.ino` and set `WIFI_SSID`, `WIFI_PASSWORD`, `API_BASE_URL`, and `DEVICE_API_KEY` in the configuration block at the top of that same file. Copy the device key from your local `.env`; keep this sketch private after inserting credentials. Set `API_BASE_URL` to your computer's LAN IP and port (not `localhost`), then select your ESP32 board and upload.
+Follow [`HARDWARE_CONNECTIONS.md`](./HARDWARE_CONNECTIONS.md). Configure `WIFI_SSID` and `WIFI_PASSWORD` at the top of `firmware/antende_esp32/antende_esp32.ino`. For Render, keep `API_BASE_URL` as `https://antende.onrender.com` and copy `DEVICE_API_KEY` from the Render environment settings—not from local `.env`. For local development, set `API_BASE_URL` to your computer's LAN IP and use the local `.env` device key. Set `ROOT_CA_CERT` to the trusted certificate for HTTPS; the firmware refuses unverified HTTPS connections. Do not commit the sketch after adding real Wi-Fi credentials, API keys, or certificates.
 
 For local development, the ESP32 and computer must be on the same Wi-Fi network. Set `API_BASE_URL` to the computer's LAN address, such as `http://192.168.1.10:3000` (not `localhost`). Allow inbound connections to the selected port in the computer's firewall if needed. Plain HTTP is only appropriate for a trusted local development network. For a public deployment, use HTTPS and configure the trusted root certificate in `ROOT_CA_CERT`; the firmware refuses HTTPS connections without a certificate.
 

@@ -6,17 +6,12 @@
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 
-// Configure these values in this file before uploading the firmware.
-// DEVICE_API_KEY must match DEVICE_API_KEY in the server's local .env file.
-// Do not publish this sketch after adding real Wi-Fi credentials or API keys.
+// Configure these values before flashing. Do not commit real credentials.
 const char *WIFI_SSID = "YOUR_WIFI_SSID";
 const char *WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
-const char *API_BASE_URL = "https://your-service.onrender.com";
-const char *DEVICE_API_KEY = "replace-with-device-api-key";
+const char *API_BASE_URL = "https://antende.onrender.com";
+const char *DEVICE_API_KEY = "REPLACE_WITH_RENDER_DEVICE_API_KEY";
 const char *DEVICE_ID = "esp32-01";
-
-// For HTTPS deployments, paste the server's trusted root CA certificate here.
-// Leave empty only for local HTTP development on a trusted network.
 const char *ROOT_CA_CERT = "";
 
 constexpr uint8_t RFID_SS_PIN = 5;
