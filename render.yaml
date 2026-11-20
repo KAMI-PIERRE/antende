@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: antende
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ADMIN_API_KEY
+        generateValue: true
+      - key: DEVICE_API_KEY
+        generateValue: true
+      - key: ATTENDANCE_TIME_ZONE
+        value: UTC
+      - key: DEVICE_ID
+        value: esp32-01

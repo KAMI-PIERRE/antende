@@ -1,0 +1,19 @@
+{
+  "name": "antende",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RFID student registration and attendance system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check public/app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.55.0",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0"
+  }
+}

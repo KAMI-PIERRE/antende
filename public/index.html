@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#102a43">
+    <title>antende | Student attendance</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div id="loginScreen" class="login-screen">
+      <form id="loginForm" class="login-card">
+        <div class="brand-mark">A</div>
+        <p class="eyebrow">RFID STUDENT MANAGEMENT</p>
+        <h1>Welcome to antende</h1>
+        <p class="muted">Enter the administrator API key configured on the server.</p>
+        <label for="apiKey">Administrator key</label>
+        <input id="apiKey" type="password" autocomplete="current-password" required>
+        <p id="loginError" class="form-error" role="alert"></p>
+        <button class="button primary full-width" type="submit">Sign in</button>
+      </form>
+    </div>
+
+    <div id="appShell" class="app-shell hidden">
+      <aside class="sidebar">
+        <a class="brand" href="#" aria-label="antende home">
+          <span class="brand-mark">A</span><span>antende</span>
+        </a>
+        <p class="sidebar-caption">WORKSPACE</p>
+        <nav id="mainNav" class="main-nav" aria-label="Main navigation">
+          <button class="nav-link active" data-view="dashboard"><span>▦</span> Dashboard</button>
+          <button class="nav-link" data-view="students"><span>♙</span> Students</button>
+          <button class="nav-link" data-view="attendance"><span>◷</span> Attendance</button>
+          <button class="nav-link" data-view="reports"><span>▤</span> Reports</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <span class="device-indicator"><i></i> ESP32 device <strong id="deviceIdLabel">esp32-01</strong></span>
+          <button id="logoutButton" class="nav-link logout"><span>↪</span> Sign out</button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="pageEyebrow">OVERVIEW</p>
+            <h1 id="pageTitle">Dashboard</h1>
+          </div>
+          <div class="topbar-right">
+            <span class="date-label" id="todayLabel"></span>
+            <span class="avatar">AD</span>
+          </div>
+        </header>
+
+        <div id="notifications" class="notifications" role="status" aria-live="polite" aria-atomic="false"></div>
+        <section id="view-dashboard" class="view">
+          <div class="section-heading">
+            <div><h2>Attendance overview</h2><p>Live totals from your student and attendance records.</p></div>
+            <button id="refreshDashboard" class="button secondary">Refresh data</button>
+          </div>
+          <div class="stat-grid">
+            <article class="stat-card"><span class="stat-icon blue">♙</span><p>Registered students</p><strong id="statStudents">—</strong><small>Active student profiles</small></article>
+            <article class="stat-card"><span class="stat-icon green">✓</span><p>Present today</p><strong id="statPresent">—</strong><small>Unique students checked in</small></article>
+            <article class="stat-card"><span class="stat-icon amber">◷</span><p>Absent today</p><strong id="statAbsent">—</strong><small>Not yet checked in</small></article>
+            <article class="stat-card"><span class="stat-icon violet">%</span><p>Attendance rate</p><strong id="statRate">—</strong><small>Of active students today</small></article>
+          </div>
+          <section class="panel">
+            <div class="panel-heading"><div><h2>Today's attendance</h2><p id="dashboardDate"></p></div><button class="text-button" data-go="attendance">View all records →</button></div>
+            <div class="table-wrap"><table><thead><tr><th>Student</th><th>Student ID / UID</th><th>Class</th><th>Time</th><th>Status</th></tr></thead><tbody id="dashboardRecords"></tbody></table></div>
+          </section>
+        </section>
+
+        <section id="view-students" class="view hidden">
+          <div class="section-heading">
+            <div><h2>Student directory</h2><p>Register students, assign RFID cards, and manage active profiles.</p></div>
+            <button id="addStudentButton" class="button primary">＋ Register student</button>
+          </div>
+          <section class="panel">
+            <div class="toolbar">
+              <input id="studentSearch" class="search-input" type="search" placeholder="Search name or Student ID">
+              <select id="studentClassFilter"><option value="">All classes</option></select>
+              <span id="studentCount" class="result-count"></span>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Student</th><th>Student ID / UID</th><th>Class</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsTable"></tbody></table></div>
+          </section>
+        </section>
+
+        <section id="view-attendance" class="view hidden">
+          <div id="attendanceNotifications" class="notifications" role="status" aria-live="polite" aria-atomic="false"></div>
+          <div class="section-heading">
+            <div><h2>Attendance records</h2><p>Filter saved card scans by date and class.</p></div>
+            <button id="exportAttendance" class="button secondary">Export CSV</button>
+          </div>
+          <section class="panel">
+            <div class="toolbar filters">
+              <label>From <input id="attendanceFrom" type="date"></label>
+              <label>To <input id="attendanceTo" type="date"></label>
+              <select id="attendanceClassFilter"><option value="">All classes</option></select>
+              <button id="filterAttendance" class="button secondary">Apply filters</button>
+              <span id="attendanceCount" class="result-count"></span>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Student</th><th>Student ID / UID</th><th>Class</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="attendanceTable"></tbody></table></div>
+          </section>
+        </section>
+
+        <section id="view-reports" class="view hidden">
+          <div class="section-heading">
+            <div><h2>Reports & analytics</h2><p>Attendance summaries use the server's configured timezone.</p></div>
+            <button id="exportReport" class="button secondary">Export report CSV</button>
+          </div>
+          <section class="panel">
+            <div class="toolbar filters">
+              <label>Period <select id="reportPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></label>
+              <label>Reference date <input id="reportDate" type="date"></label>
+              <button id="loadReport" class="button secondary">Generate report</button>
+            </div>
+            <div id="reportRange" class="report-range"></div>
+            <div class="stat-grid report-stats">
+              <article class="stat-card"><p>Active students</p><strong id="reportStudents">—</strong></article>
+              <article class="stat-card"><p>Attendance entries</p><strong id="reportPresent">—</strong></article>
+              <article class="stat-card"><p>Expected absences</p><strong id="reportAbsent">—</strong></article>
+              <article class="stat-card"><p>Attendance rate</p><strong id="reportRate">—</strong></article>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-heading"><div><h2>Individual student history</h2><p>Choose a student to inspect past attendance.</p></div>
+              <div class="inline-controls"><select id="historyStudent"><option value="">Select a student</option></select><button id="loadHistory" class="button secondary">View history</button></div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time</th><th>Student ID / UID</th><th>Class</th><th>Status</th></tr></thead><tbody id="historyTable"></tbody></table></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="studentDialog" class="student-dialog">
+      <div id="studentNotifications" class="notifications" role="status" aria-live="polite" aria-atomic="false"></div>
+      <form id="studentForm" method="dialog">
+        <div class="dialog-heading"><div><p class="eyebrow">STUDENT PROFILE</p><h2 id="studentDialogTitle">Register student</h2></div><button type="button" class="icon-button" id="closeDialog" aria-label="Close">×</button></div>
+        <input id="studentRecordId" type="hidden">
+        <div class="form-grid">
+          <label class="span-two">Full name <input id="fullName" name="full_name" maxlength="120" required></label>
+          <label>Class <div class="class-control"><select id="studentClass" name="class_id"><option value="">Unassigned</option></select><button type="button" id="addClassButton" class="button small secondary">＋</button></div></label>
+          <label>Student ID / RFID UID <div class="uid-control"><input id="studentUid" name="student_id" maxlength="20" placeholder="e.g. 04A1B2C3" required><button type="button" id="scanCardButton" class="button small secondary">Scan card</button></div></label>
+          <p id="scanStatus" class="scan-status span-two" role="status"></p>
+          <label>Gender <select id="studentGender" name="gender"><option value="">Select gender</option><option value="Male">Male</option><option value="Female">Female</option></select></label>
+          <label>Phone <input id="studentPhone" name="phone" maxlength="50"></label>
+          <label class="span-two">Email <input id="studentEmail" name="email" type="email" maxlength="254"></label>
+        </div>
+        <p id="studentFormError" class="form-error" role="alert"></p>
+        <div class="dialog-actions"><button type="button" id="cancelStudent" class="button secondary">Cancel</button><button type="submit" class="button primary">Save student</button></div>
+      </form>
+    </dialog>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
