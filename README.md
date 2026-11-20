@@ -70,7 +70,16 @@ The root [`render.yaml`](./render.yaml) configures a free Render web service usi
 1. Apply [`supabase/schema.sql`](./supabase/schema.sql) to your Supabase project if you have not already.
 2. Push this project to a GitHub, GitLab, or Bitbucket repository. Keep `.env` and device credentials out of the repository; `.env` is ignored by `.gitignore`.
 3. In Render, choose **New → Blueprint**, connect the repository, and deploy the `render.yaml` Blueprint.
-4. When prompted, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Render. Use the server-only Supabase service-role/secret key; never put it in the browser or ESP32 firmware. Render generates separate `ADMIN_API_KEY` and `DEVICE_API_KEY` values.
+4. When prompted, set `SUPABASE_URL` and `SUPABASE_KEY` in Render. For this disposable test setup, use the Supabase publishable key and disable RLS on the four application tables by running this in the Supabase SQL Editor:
+
+   ```sql
+   alter table public.classes disable row level security;
+   alter table public.students disable row level security;
+   alter table public.attendance disable row level security;
+   alter table public.registration_requests disable row level security;
+   ```
+
+   This makes the test data accessible to anyone with the public key. Do not use this setup with real student records. For real data, keep RLS enabled and set a server-only service-role/secret key in Render instead; never put that key in the browser or ESP32 firmware. Render generates separate `ADMIN_API_KEY` and `DEVICE_API_KEY` values.
 5. After deployment, open the service URL and sign in using `ADMIN_API_KEY` from the Render environment settings. Configure the ESP32 with that service URL as `API_BASE_URL`, `DEVICE_API_KEY` from Render, and the trusted certificate in `ROOT_CA_CERT` for HTTPS.
 
 ## 3. Wire and flash the ESP32
