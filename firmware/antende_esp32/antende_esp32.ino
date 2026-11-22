@@ -6,12 +6,16 @@
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 
-// Configure these values before flashing. Do not commit real credentials.
-const char *WIFI_SSID = "YOUR_WIFI_SSID";
-const char *WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+// Configure these values before uploading. Do not publish this sketch with credentials.
+const char *WIFI_SSID = "I-am-Groot-2G";
+const char *WIFI_PASSWORD = "ot!npSK1121";
 const char *API_BASE_URL = "https://antende.onrender.com";
-const char *DEVICE_API_KEY = "REPLACE_WITH_RENDER_DEVICE_API_KEY";
+const char *DEVICE_API_KEY = "fC6W1VoPWpk67NsVhI4hCtTNUTjS7EQNOLAPZTosnqA=";
 const char *DEVICE_ID = "esp32-01";
+// TESTING ONLY: skips HTTPS certificate verification so the device can connect
+// without configuring ROOT_CA_CERT. The device API key can be intercepted.
+// Set to false and configure ROOT_CA_CERT before using this outside testing.
+const bool ALLOW_INSECURE_HTTPS_FOR_TESTING = true;
 const char *ROOT_CA_CERT = "";
 
 constexpr uint8_t RFID_SS_PIN = 5;
@@ -37,11 +41,15 @@ String makeUrl(const String &path) {
 bool beginRequest(HTTPClient &http, WiFiClient &plainClient, WiFiClientSecure &secureClient,
                  const String &url) {
   if (url.startsWith("https://")) {
-    if (strlen(ROOT_CA_CERT) == 0) {
-      Serial.println("HTTPS requires ROOT_CA_CERT; refusing an unverified connection.");
-      return false;
+    if (ALLOW_INSECURE_HTTPS_FOR_TESTING) {
+      secureClient.setInsecure();
+    } else {
+      if (strlen(ROOT_CA_CERT) == 0) {
+        Serial.println("HTTPS requires ROOT_CA_CERT when testing bypass is disabled.");
+        return false;
+      }
+      secureClient.setCACert(ROOT_CA_CERT);
     }
-    secureClient.setCACert(ROOT_CA_CERT);
     return http.begin(secureClient, url);
   }
   return http.begin(plainClient, url);
@@ -211,6 +219,9 @@ void processCard(const String &uid) {
 
 void setup() {
   Serial.begin(115200);
+  if (String(API_BASE_URL).startsWith("https://") && ALLOW_INSECURE_HTTPS_FOR_TESTING) {
+    Serial.println("WARNING: TESTING MODE - HTTPS certificate verification is disabled.");
+  }
   pinMode(GREEN_LED_PIN, OUTPUT);
   pinMode(RED_LED_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
